@@ -1,7 +1,6 @@
 package main
 
 import (
-"fmt"
 "image"
 "image/color"
 "log"
@@ -30,7 +29,7 @@ func main() {
 go func() {
 w := new(app.Window)
 w.Option(app.Title("BOTMC - Desktop Client"))
-w.Option(app.Size(1024, 720)) // Widescreen Desktop resolution
+w.Option(app.Size(1024, 720))
 if err := run(w); err != nil {
 log.Fatal(err)
 }
@@ -46,12 +45,10 @@ th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
 cfg := LoadConfig()
 var ops op.Ops
 
-// Microsoft Login State
 isLoggedIn := false
 userAuthCode := "https://microsoft.com/link\nCode: MCBE-7829"
 var msLoginBtn widget.Clickable
 
-// Editors
 var ipEditor, portEditor, userEditor widget.Editor
 ipEditor.SetText(cfg.ServerIP)
 portEditor.SetText(cfg.ServerPort)
@@ -66,7 +63,6 @@ chatEditor.SingleLine = true
 var joinBtn, stopBtn, rejoinBtn widget.Clickable
 var sendChatBtn widget.Clickable
 
-// Desktop Sidebar Navigation
 navs := []NavItem{
 {"Home Dashboard", widget.Clickable{}},
 {"Minimap & Radar", widget.Clickable{}},
@@ -93,7 +89,6 @@ var list, navList widget.List
 list.Axis = layout.Vertical
 navList.Axis = layout.Vertical
 
-// Desktop Cyberpunk Theme Palette
 bgColor := color.NRGBA{R: 12, G: 14, B: 20, A: 255}       
 sidebarColor := color.NRGBA{R: 16, G: 20, B: 28, A: 255}  
 cardColor := color.NRGBA{R: 22, G: 26, B: 36, A: 255}     
@@ -169,7 +164,6 @@ chatEditor.SetText("")
 paint.Fill(gtx.Ops, bgColor)
 
 if !isLoggedIn {
-// Microsoft Login Flow Screen
 layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 32, Bottom: 32, Left: 36, Right: 36}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -205,9 +199,7 @@ return btn.Layout(gtx)
 })
 })
 } else {
-// WIDESCREEN DESKTOP LAYOUT (Left Sidebar + Right Multi-Column Content)
 layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-// Wide Desktop Sidebar
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 gtx.Constraints.Max.X = gtx.Dp(unit.Dp(220))
 return drawCard(gtx, sidebarColor, func(gtx layout.Context) layout.Dimensions {
@@ -241,24 +233,18 @@ return layout.Inset{Bottom: 8}.Layout(gtx, btn.Layout)
 })
 }),
 
-// Right Widescreen Content Panel
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 switch currentTab {
-case 0: // Home Dashboard with Widescreen Split Layout
+case 0:
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-// Top Header
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 14}.Layout(gtx, material.H4(th, "Dashboard Control Center").Layout)
 }),
-
-// Split Row for Desktop (Left: Connection & Status, Right: Activity Logs)
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-// Left Column: Server Connection + Ping Card
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-// Server Connection Card
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
@@ -306,8 +292,6 @@ return b.Layout(gtx)
 })
 })
 }),
-
-// Live Status & Ping Card
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 14, Bottom: 14, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -328,10 +312,7 @@ return lbl.Layout(gtx)
 }),
 )
 }),
-
 layout.Rigid(layout.Spacer{Width: 16}.Layout),
-
-// Right Column: Live Activity Console
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
