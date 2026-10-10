@@ -1,4 +1,4 @@
-name: Build BOTMC Test APK
+name: Build MCBE BOT APK
 
 on:
   push:
