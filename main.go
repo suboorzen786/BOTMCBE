@@ -7,9 +7,9 @@ import (
 
 "gioui.org/app"
 "gioui.org/font/gofont"
-"gioui.org/io/system"
 "gioui.org/layout"
 "gioui.org/op"
+"gioui.org/text"
 "gioui.org/widget"
 "gioui.org/widget/material"
 
@@ -31,13 +31,12 @@ app.Main()
 
 func run(w *app.Window) error {
 th := material.NewTheme()
-th.Shaper = gofont.Collection()
+th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
 
 cfg := LoadConfig()
 
 var ops op.Ops
 
-// Form Controls
 var ipEditor, portEditor, userEditor widget.Editor
 ipEditor.SetText(cfg.ServerIP)
 portEditor.SetText(cfg.ServerPort)
@@ -45,7 +44,6 @@ userEditor.SetText(cfg.BotUsername)
 
 var chatEditor widget.Editor
 
-// Action Buttons
 var joinBtn, stopBtn, rejoinBtn widget.Clickable
 var sendChatBtn widget.Clickable
 
@@ -54,12 +52,11 @@ var activeBot *bot.BotSession
 
 for {
 switch e := w.Event().(type) {
-case system.DestroyEvent:
+case app.DestroyEvent:
 return e.Err
-case system.FrameEvent:
-gtx := layout.NewContext(&ops, e)
+case app.FrameEvent:
+gtx := app.NewContext(&ops, e)
 
-// Button Handlers
 if joinBtn.Clicked(gtx) {
 cfg.ServerIP = ipEditor.Text()
 cfg.ServerPort = portEditor.Text()
@@ -95,16 +92,13 @@ chatEditor.SetText("")
 }
 }
 
-// Render Screen Layout
 layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-// Header Title
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16}.Layout(gtx,
 material.H5(th, "BOTMC Dashboard").Layout,
 )
 }),
 
-// Inputs Form
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -115,7 +109,6 @@ layout.Rigid(material.Editor(th, &userEditor, "Bot Username").Layout),
 })
 }),
 
-// Action Buttons (JOIN, STOP, REJOIN)
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 10, Bottom: 10, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
@@ -126,7 +119,6 @@ layout.Flexed(1, material.Button(th, &rejoinBtn, "REJOIN").Layout),
 })
 }),
 
-// Coordinates & Status Overlay
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 coordsText := "Bot Offline"
 if activeBot != nil && activeBot.IsConnected {
@@ -137,7 +129,6 @@ material.Body2(th, coordsText).Layout,
 )
 }),
 
-// Chat Console Input Box
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Left: 16, Right: 16, Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
@@ -147,13 +138,10 @@ layout.Rigid(material.Button(th, &sendChatBtn, "Send").Layout),
 })
 }),
 
-// Footer Watermark
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-return layout.Align(layout.South).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 16}.Layout(gtx,
+return layout.Inset{Bottom: 16, Left: 16}.Layout(gtx,
 material.Caption(th, "✦ Crafted by Suboorzen").Layout,
 )
-})
 }),
 )
 
