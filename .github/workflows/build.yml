@@ -13,18 +13,15 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version-file: go.mod
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
-      - name: Resolve Go modules
-        run: |
-          go get gioui.org@latest
-          go get github.com/sandertv/gophertunnel@latest
-          go mod tidy
+      - name: Download modules
+        run: go mod download
 
       - name: Install gogio
         run: go install gioui.org/cmd/gogio@latest
