@@ -43,12 +43,15 @@ portEditor.SetText(cfg.ServerPort)
 userEditor.SetText(cfg.BotUsername)
 
 var chatEditor widget.Editor
-
 var joinBtn, stopBtn, rejoinBtn widget.Clickable
 var sendChatBtn widget.Clickable
 
 logChan := make(chan string, 100)
+var logMessages []string
 var activeBot *bot.BotSession
+
+var list widget.List
+list.Axis = layout.Vertical
 
 for {
 switch e := w.Event().(type) {
@@ -56,6 +59,17 @@ case app.DestroyEvent:
 return e.Err
 case app.FrameEvent:
 gtx := app.NewContext(&ops, e)
+
+// Non-blocking read from log channel
+select {
+case msg := <-logChan:
+logMessages = append(logMessages, msg)
+if len(logMessages) > 100 {
+logMessages = logMessages[len(logMessages)-100:]
+}
+w.Invalidate()
+default:
+}
 
 if joinBtn.Clicked(gtx) {
 cfg.ServerIP = ipEditor.Text()
@@ -94,23 +108,23 @@ chatEditor.SetText("")
 
 layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 16, Bottom: 16, Left: 16}.Layout(gtx,
+return layout.Inset{Top: 16, Bottom: 12, Left: 16}.Layout(gtx,
 material.H5(th, "BOTMC Dashboard").Layout,
 )
 }),
 
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Left: 16, Right: 16, Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-layout.Rigid(material.Editor(th, &ipEditor, "Server Address").Layout),
+layout.Rigid(material.Editor(th, &ipEditor, "Server IP").Layout),
 layout.Rigid(material.Editor(th, &portEditor, "Port").Layout),
-layout.Rigid(material.Editor(th, &userEditor, "Bot Username").Layout),
+layout.Rigid(material.Editor(th, &userEditor, "Username").Layout),
 )
 })
 }),
 
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 10, Bottom: 10, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 6, Bottom: 6, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
 layout.Flexed(1, material.Button(th, &joinBtn, "JOIN").Layout),
 layout.Flexed(1, material.Button(th, &stopBtn, "STOP").Layout),
@@ -120,28 +134,31 @@ layout.Flexed(1, material.Button(th, &rejoinBtn, "REJOIN").Layout),
 }),
 
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-coordsText := "Bot Offline"
+coordsText := "Status: Offline"
 if activeBot != nil && activeBot.IsConnected {
-coordsText = fmt.Sprintf("Position: %s", activeBot.Coords)
+coordsText = fmt.Sprintf("Live %s", activeBot.Coords)
 }
 return layout.Inset{Left: 16, Top: 8, Bottom: 8}.Layout(gtx,
 material.Body2(th, coordsText).Layout,
 )
 }),
 
-layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Left: 16, Right: 16, Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-layout.Flexed(1, material.Editor(th, &chatEditor, "Type message / command...").Layout),
-layout.Rigid(material.Button(th, &sendChatBtn, "Send").Layout),
-)
+// Live Logs Console Area
+layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Left: 16, Right: 16, Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return material.List(th, &list).Layout(gtx, len(logMessages), func(gtx layout.Context, index int) layout.Dimensions {
+return material.Body2(th, logMessages[index]).Layout(gtx)
+})
 })
 }),
 
-layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 16, Left: 16}.Layout(gtx,
-material.Caption(th, "✦ Crafted by Suboorzen").Layout,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Left: 16, Right: 16, Bottom: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Flexed(1, material.Editor(th, &chatEditor, "Chat / Command...").Layout),
+layout.Rigid(material.Button(th, &sendChatBtn, "Send").Layout),
 )
+})
 }),
 )
 
