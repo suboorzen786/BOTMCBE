@@ -1,17 +1,17 @@
-<<<<<<< HEAD
 name: Build BOTMC APK
 
 on:
   push:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Go
@@ -19,38 +19,16 @@ jobs:
       with:
         go-version: '1.22'
 
-    - name: Build Binary / Placeholder
+    - name: Install System Dependencies for Gio UI
       run: |
-        go build -o botmc_app main.go || echo "Main.go will be added soon"
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libx11-dev xorg-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: botmc-build
-        path: .
-=======
-name: Build APK
-on:
-  push:
-  workflow_dispatch:
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Build APK
-        run: |
-          export ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}
-          go run gioui.org/cmd/gogio@v0.10.3 -target android -arch arm64 -appid com.suboorzen.botmc -o BOTMC.apk .
-      - uses: actions/upload-artifact@v4
-        with:
-          name: BOTMC-apk
-          path: BOTMC.apk
->>>>>>> 5a9a5d367f06ea9c01842d8a0cd07de70acdc972
+    - name: Install Fyne / Gio mobile tools (gomobile)
+      run: |
+        go install golang.org/x/mobile/cmd/gomobile@latest
+        gomobile init
+
+    - name: Build Go Binary / APK
+      run: |
+        go build -v .
