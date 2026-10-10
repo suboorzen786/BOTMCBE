@@ -28,8 +28,8 @@ Click widget.Clickable
 func main() {
 go func() {
 w := new(app.Window)
-w.Option(app.Title("BOTMC - Desktop Client"))
-w.Option(app.Size(1024, 720))
+w.Option(app.Title("BOTMC - Desktop Edition"))
+w.Option(app.Size(1280, 800)) // Force Desktop Widescreen Resolution
 if err := run(w); err != nil {
 log.Fatal(err)
 }
@@ -57,11 +57,7 @@ ipEditor.SingleLine = true
 portEditor.SingleLine = true
 userEditor.SingleLine = true
 
-var chatEditor widget.Editor
-chatEditor.SingleLine = true
-
 var joinBtn, stopBtn, rejoinBtn widget.Clickable
-var sendChatBtn widget.Clickable
 
 navs := []NavItem{
 {"Home Dashboard", widget.Clickable{}},
@@ -70,6 +66,7 @@ navs := []NavItem{
 {"Commands & Automation", widget.Clickable{}},
 {"Login & Account", widget.Clickable{}},
 {"Auto Reconnect", widget.Clickable{}},
+{"Version Settings", widget.Clickable{}},
 {"Saved Profiles", widget.Clickable{}},
 {"Connection Logs", widget.Clickable{}},
 {"App Settings", widget.Clickable{}},
@@ -78,10 +75,10 @@ currentTab := 0
 
 logChan := make(chan string, 100)
 var logMessages []string = []string{
-"Desktop client initialized - BOTMC v1.0",
-"Connected to play.example.net - BotMC_Bot active",
-"Ping: 38 ms - Stable connection",
-"Uptime tracker running: 01:24:10",
+"Desktop Client v1.0 initialized successfully",
+"Connected to play.example.net - BotMC active",
+"Ping: 35 ms - Connection stable",
+"Uptime tracker: 02:15:40 active",
 }
 var activeBot *bot.BotSession
 
@@ -89,11 +86,13 @@ var list, navList widget.List
 list.Axis = layout.Vertical
 navList.Axis = layout.Vertical
 
-bgColor := color.NRGBA{R: 12, G: 14, B: 20, A: 255}       
-sidebarColor := color.NRGBA{R: 16, G: 20, B: 28, A: 255}  
-cardColor := color.NRGBA{R: 22, G: 26, B: 36, A: 255}     
-textColor := color.NRGBA{R: 240, G: 242, B: 245, A: 255}  
-subTextColor := color.NRGBA{R: 130, G: 140, B: 160, A: 255} 
+// Desktop Cyberpunk Theme Palette
+bgColor := color.NRGBA{R: 10, G: 12, B: 18, A: 255}       
+sidebarColor := color.NRGBA{R: 14, G: 18, B: 26, A: 255}  
+cardColor := color.NRGBA{R: 20, G: 25, B: 38, A: 255}     
+inputBgColor := color.NRGBA{R: 12, G: 16, B: 24, A: 255}  
+textColor := color.NRGBA{R: 255, G: 255, B: 255, A: 255}  
+subTextColor := color.NRGBA{R: 150, G: 165, B: 190, A: 255} 
 cyanAccent := color.NRGBA{R: 0, G: 240, B: 255, A: 255}   
 btnRed := color.NRGBA{R: 215, G: 55, B: 75, A: 255}       
 btnGreen := color.NRGBA{R: 35, G: 140, B: 95, A: 255}     
@@ -154,19 +153,12 @@ activeBot = bot.NewBotSession(cfg.ServerIP, cfg.ServerPort, cfg.BotUsername, cfg
 go activeBot.Connect()
 }
 
-if sendChatBtn.Clicked(gtx) && chatEditor.Text() != "" {
-if activeBot != nil {
-activeBot.SendChat(chatEditor.Text())
-chatEditor.SetText("")
-}
-}
-
 paint.Fill(gtx.Ops, bgColor)
 
 if !isLoggedIn {
 layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 32, Bottom: 32, Left: 36, Right: 36}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 36, Bottom: 36, Left: 40, Right: 40}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.H3(th, "BOTMC")
@@ -174,24 +166,24 @@ lbl.Color = cyanAccent
 return layout.Inset{Bottom: 4}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Body1(th, "✦ Desktop Edition — Crafted by Suboorzen")
+lbl := material.Body1(th, "✦ Desktop Client Edition — Crafted by Suboorzen")
 lbl.Color = subTextColor
-return layout.Inset{Bottom: 24}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 28}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Body1(th, "Microsoft Device Code Login")
+lbl := material.H6(th, "Microsoft Device Code Sign-In")
 lbl.Color = textColor
 return layout.Inset{Bottom: 12}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.H6(th, userAuthCode)
+lbl := material.Body1(th, userAuthCode)
 lbl.Color = cyanAccent
-return layout.Inset{Bottom: 24}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 28}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-btn := material.Button(th, &msLoginBtn, "Authenticate & Launch Desktop Client")
+btn := material.Button(th, &msLoginBtn, "Authenticate & Launch Desktop Dashboard")
 btn.Background = cyanAccent
-btn.Color = color.NRGBA{R: 12, G: 14, B: 20, A: 255}
+btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
 return btn.Layout(gtx)
 }),
 )
@@ -199,11 +191,13 @@ return btn.Layout(gtx)
 })
 })
 } else {
+// DESKTOP WIDESCREEN LAYOUT (Wide Sidebar + Multi-Column Dashboard)
 layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+// Wide Desktop Sidebar
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-gtx.Constraints.Max.X = gtx.Dp(unit.Dp(220))
+gtx.Constraints.Max.X = gtx.Dp(unit.Dp(240))
 return drawCard(gtx, sidebarColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 16, Bottom: 16, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 16, Bottom: 16, Left: 14, Right: 14}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.H5(th, "BOTMC")
@@ -213,14 +207,14 @@ return layout.Inset{Bottom: 2, Left: 4}.Layout(gtx, lbl.Layout)
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.Caption(th, "Desktop Client v1.0")
 lbl.Color = subTextColor
-return layout.Inset{Bottom: 20, Left: 4}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 24, Left: 4}.Layout(gtx, lbl.Layout)
 }),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return material.List(th, &navList).Layout(gtx, len(navs), func(gtx layout.Context, index int) layout.Dimensions {
 btn := material.Button(th, &navs[index].Click, navs[index].Name)
 if currentTab == index {
 btn.Background = cyanAccent
-btn.Color = color.NRGBA{R: 12, G: 14, B: 20, A: 255}
+btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
 } else {
 btn.Background = color.NRGBA{R: 0, G: 0, B: 0, A: 0}
 btn.Color = textColor
@@ -233,16 +227,20 @@ return layout.Inset{Bottom: 8}.Layout(gtx, btn.Layout)
 })
 }),
 
+// Widescreen Right Content Area
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 switch currentTab {
-case 0:
+case 0: // Desktop Home Dashboard
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 14}.Layout(gtx, material.H4(th, "Dashboard Control Center").Layout)
+return layout.Inset{Bottom: 16}.Layout(gtx, material.H4(th, "Desktop Control Center").Layout)
 }),
+
+// Two-Column Widescreen Split Layout
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+// Left Column: Server Connection & Status
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -253,27 +251,51 @@ return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.H6(th, "Server Connection")
 lbl.Color = textColor
-return layout.Inset{Bottom: 12}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 4}.Layout(gtx, lbl.Layout)
 }),
-layout.Rigid(material.Editor(th, &ipEditor, "Server Address").Layout),
-layout.Rigid(layout.Spacer{Height: 10}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-layout.Flexed(1, material.Editor(th, &portEditor, "Port").Layout),
-layout.Rigid(layout.Spacer{Width: 10}.Layout),
-layout.Flexed(2, material.Editor(th, &userEditor, "Bot Username").Layout),
-)
+lbl := material.Body2(th, "Configure your Minecraft Bedrock server parameters")
+lbl.Color = subTextColor
+return layout.Inset{Bottom: 14}.Layout(gtx, lbl.Layout)
 }),
+drawCard(gtx, inputBgColor, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+ed := material.Editor(th, &ipEditor, "Server Address")
+ed.Color = textColor
+return ed.Layout(gtx)
+})
+}),
+layout.Rigid(layout.Spacer{Height: 10}.Layout),
+layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+return drawCard(gtx, inputBgColor, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+ed := material.Editor(th, &portEditor, "Port")
+ed.Color = textColor
+return ed.Layout(gtx)
+})
+})
+}),
+layout.Rigid(layout.Spacer{Width: 10}.Layout),
+layout.Flexed(2, func(gtx layout.Context) layout.Dimensions {
+return drawCard(gtx, inputBgColor, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+ed := material.Editor(th, &userEditor, "Bot Username")
+ed.Color = textColor
+return ed.Layout(gtx)
+})
+})
+}),
+),
 layout.Rigid(layout.Spacer{Height: 14}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 btn := material.Button(th, &joinBtn, "JOIN SERVER")
 btn.Background = cyanAccent
-btn.Color = color.NRGBA{R: 12, G: 14, B: 20, A: 255}
+btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
 return btn.Layout(gtx)
 }),
 layout.Rigid(layout.Spacer{Height: 10}.Layout),
-layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 b := material.Button(th, &stopBtn, "STOP")
 b.Background = btnRed
@@ -285,8 +307,7 @@ b := material.Button(th, &rejoinBtn, "REJOIN")
 b.Background = btnGreen
 return b.Layout(gtx)
 }),
-)
-}),
+),
 )
 })
 })
@@ -302,7 +323,7 @@ lbl.Color = color.NRGBA{R: 50, G: 220, B: 100, A: 255}
 return lbl.Layout(gtx)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Body1(th, "Ping: 38 ms")
+lbl := material.Body1(th, "Uptime: 02:15:40   Ping: 35 ms")
 lbl.Color = subTextColor
 return lbl.Layout(gtx)
 }),
@@ -312,21 +333,34 @@ return lbl.Layout(gtx)
 }),
 )
 }),
+
 layout.Rigid(layout.Spacer{Width: 16}.Layout),
+
+// Right Column: Live Activity Console
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.H6(th, "Live Activity Console")
 lbl.Color = textColor
-return layout.Inset{Bottom: 10}.Layout(gtx, lbl.Layout)
+return lbl.Layout(gtx)
 }),
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+lbl := material.Body2(th, "View All >")
+lbl.Color = cyanAccent
+return lbl.Layout(gtx)
+}),
+)
+}),
+layout.Rigid(layout.Spacer{Height: 12}.Layout),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return material.List(th, &list).Layout(gtx, len(logMessages), func(gtx layout.Context, index int) layout.Dimensions {
 lbl := material.Body1(th, logMessages[index])
 lbl.Color = subTextColor
-return layout.Inset{Top: 4, Bottom: 4}.Layout(gtx, lbl.Layout)
+return layout.Inset{Top: 6, Bottom: 6}.Layout(gtx, lbl.Layout)
 })
 }),
 )
@@ -334,18 +368,27 @@ return layout.Inset{Top: 4, Bottom: 4}.Layout(gtx, lbl.Layout)
 })
 }),
 )
+}),
+
+// Desktop Footer
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+lbl := material.Caption(th, "✦ Desktop Edition — Crafted by Suboorzen")
+lbl.Color = subTextColor
+return layout.Center.Layout(gtx, lbl.Layout)
+})
 }),
 )
 
 default:
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 14}.Layout(gtx, material.H4(th, navs[currentTab].Name).Layout)
+return layout.Inset{Bottom: 16}.Layout(gtx, material.H4(th, navs[currentTab].Name).Layout)
 }),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 20, Left: 20, Right: 20}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-lbl := material.Body1(th, "Desktop module active and configured.")
+return layout.Inset{Top: 24, Left: 24, Right: 24}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+lbl := material.Body1(th, "Desktop module active and operational.")
 lbl.Color = subTextColor
 return lbl.Layout(gtx)
 })
