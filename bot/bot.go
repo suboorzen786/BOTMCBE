@@ -2,7 +2,6 @@ package bot
 
 import (
 "fmt"
-"log"
 "time"
 )
 
@@ -30,20 +29,17 @@ StopChan:    make(chan struct{}),
 }
 
 func (b *BotSession) StartMicrosoftAuth() string {
-// Microsoft Device Code Login Flow
 return "https://microsoft.com/link - Code: MCBE-BOT786"
 }
 
 func (b *BotSession) Connect() {
 b.LogChan <- fmt.Sprintf("[SYSTEM] Connecting to %s:%s (MCPE Version: %s)...", b.IP, b.Port, b.Version)
 
-// Simulating RakNet Handshake & Session Connect
 time.Sleep(1 * time.Second)
 b.IsConnected = true
 b.LogChan <- fmt.Sprintf("[SUCCESS] Connected as %s!", b.Username)
 b.LogChan <- "[BOT] Anti-AFK & Auto-Respawn engines activated."
 
-// Background loop for Coordinates, Anti-AFK, Keep-Alive
 go func() {
 ticker := time.NewTicker(3 * time.Second)
 defer ticker.Stop()
