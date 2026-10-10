@@ -110,13 +110,11 @@ return e.Err
 case app.FrameEvent:
 gtx := app.NewContext(&ops, e)
 
-// Handle Login Button Click
 if msLoginBtn.Clicked(gtx) {
 isLoggedIn = true
 logMessages = append([]string{"Microsoft Account Authenticated successfully!"}, logMessages...)
 }
 
-// Handle Tab Clicks
 for i, nav := range navs {
 if nav.Click.Clicked(gtx) {
 currentTab = i
@@ -170,7 +168,6 @@ chatEditor.SetText("")
 
 paint.Fill(gtx.Ops, bgColor)
 
-// IF NOT LOGGED IN: SHOW MICROSOFT DEVICE CODE FIRST
 if !isLoggedIn {
 layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
@@ -207,9 +204,7 @@ return btn.Layout(gtx)
 })
 })
 } else {
-// LOGGED IN DASHBOARD
 layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-// Left Drawer / Sidebar
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 gtx.Constraints.Max.X = gtx.Dp(unit.Dp(135))
 return drawCard(gtx, sidebarColor, func(gtx layout.Context) layout.Dimensions {
@@ -243,16 +238,14 @@ return layout.Inset{Bottom: 4}.Layout(gtx, btn.Layout)
 })
 }),
 
-// Main Right Panel
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 8, Bottom: 8, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 switch currentTab {
-case 0: // Home Dashboard
+case 0:
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 8}.Layout(gtx, material.H5(th, "Server Connection").Layout)
 }),
-// Server Card
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
@@ -260,11 +253,13 @@ return layout.Inset{Top: 10, Bottom: 10, Left: 10, Right: 10}.Layout(gtx, func(g
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(material.Editor(th, &ipEditor, "Server IP").Layout),
 layout.Rigid(layout.Spacer{Height: 6}.Layout),
-layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, material.Editor(th, &portEditor, "Port").Layout),
 layout.Rigid(layout.Spacer{Width: 6}.Layout),
 layout.Flexed(2, material.Editor(th, &userEditor, "Bot Username").Layout),
-),
+)
+}),
 layout.Rigid(layout.Spacer{Height: 8}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 btn := material.Button(th, &joinBtn, "JOIN")
@@ -273,7 +268,8 @@ btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
 return btn.Layout(gtx)
 }),
 layout.Rigid(layout.Spacer{Height: 6}.Layout),
-layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 b := material.Button(th, &stopBtn, "STOP")
 b.Background = btnRed
@@ -285,13 +281,13 @@ b := material.Button(th, &rejoinBtn, "REJOIN")
 b.Background = color.NRGBA{R: 40, G: 120, B: 90, A: 255}
 return b.Layout(gtx)
 }),
-),
+)
+}),
 )
 })
 })
 })
 }),
-// Live Status Bar
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
@@ -308,7 +304,6 @@ layout.Rigid(material.Body2(th, "Ping: -- ms").Layout),
 })
 })
 }),
-// Recent Activity Console Logs
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -325,7 +320,7 @@ return material.Body2(th, logMessages[index]).Layout(gtx)
 }),
 )
 
-case 8: // Global Settings & Toggles
+case 8:
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 12}.Layout(gtx, material.H5(th, "Global Settings").Layout)
