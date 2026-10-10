@@ -22,19 +22,19 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libgl1-mesa-dev libx11-dev xorg-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev openjdk-17-jdk
 
-    - name: Install Official Gio Tool
+    - name: Install Stable Gio Tool (gioc)
       run: |
-        go install gioui.org/cmd/gio@latest
+        go install gioui.org/cmd/gioc@v0.7.1
         export PATH=$PATH:$(go env GOPATH)/bin
 
     - name: Clean & Tidy Dependencies
       run: |
         go mod tidy
 
-    - name: Build Android APK with Gio
+    - name: Build Android APK with gioc
       run: |
         export PATH=$PATH:$(go env GOPATH)/bin
-        gio android -o botmc.apk .
+        gioc -target android -o botmc.apk .
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
