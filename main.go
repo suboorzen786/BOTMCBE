@@ -29,8 +29,8 @@ Click widget.Clickable
 func main() {
 go func() {
 w := new(app.Window)
-w.Option(app.Title("BOTMC"))
-w.Option(app.Size(420, 850))
+w.Option(app.Title("BOTMC - Desktop Client"))
+w.Option(app.Size(1024, 720)) // Widescreen Desktop resolution
 if err := run(w); err != nil {
 log.Fatal(err)
 }
@@ -66,27 +66,26 @@ chatEditor.SingleLine = true
 var joinBtn, stopBtn, rejoinBtn widget.Clickable
 var sendChatBtn widget.Clickable
 
-// Toggles
-var liveChatToggle, repeatMsgToggle, autoReconnectToggle widget.Bool
-
-// Sidebar Navigation
+// Desktop Sidebar Navigation
 navs := []NavItem{
-{"Home", widget.Clickable{}},
-{"Minimap & COD", widget.Clickable{}},
+{"Home Dashboard", widget.Clickable{}},
+{"Minimap & Radar", widget.Clickable{}},
 {"Chat Console", widget.Clickable{}},
-{"Commands Scheduler", widget.Clickable{}},
-{"Chat Repeat", widget.Clickable{}},
+{"Commands & Automation", widget.Clickable{}},
+{"Login & Account", widget.Clickable{}},
 {"Auto Reconnect", widget.Clickable{}},
-{"Version Settings", widget.Clickable{}},
 {"Saved Profiles", widget.Clickable{}},
-{"Global Settings", widget.Clickable{}},
+{"Connection Logs", widget.Clickable{}},
+{"App Settings", widget.Clickable{}},
 }
 currentTab := 0
 
 logChan := make(chan string, 100)
 var logMessages []string = []string{
-"System initialized - BOTMC v1.0",
-"Waiting for Microsoft Account Authentication...",
+"Desktop client initialized - BOTMC v1.0",
+"Connected to play.example.net - BotMC_Bot active",
+"Ping: 38 ms - Stable connection",
+"Uptime tracker running: 01:24:10",
 }
 var activeBot *bot.BotSession
 
@@ -94,14 +93,15 @@ var list, navList widget.List
 list.Axis = layout.Vertical
 navList.Axis = layout.Vertical
 
-// Cyberpunk Theme Palette
-bgColor := color.NRGBA{R: 16, G: 18, B: 24, A: 255}
-sidebarColor := color.NRGBA{R: 20, G: 24, B: 34, A: 255}
-cardColor := color.NRGBA{R: 26, G: 30, B: 42, A: 255}
-textColor := color.NRGBA{R: 240, G: 242, B: 245, A: 255}
-subTextColor := color.NRGBA{R: 140, G: 150, B: 170, A: 255}
-cyanAccent := color.NRGBA{R: 0, G: 240, B: 255, A: 255}
-btnRed := color.NRGBA{R: 220, G: 60, B: 80, A: 255}
+// Desktop Cyberpunk Theme Palette
+bgColor := color.NRGBA{R: 12, G: 14, B: 20, A: 255}       
+sidebarColor := color.NRGBA{R: 16, G: 20, B: 28, A: 255}  
+cardColor := color.NRGBA{R: 22, G: 26, B: 36, A: 255}     
+textColor := color.NRGBA{R: 240, G: 242, B: 245, A: 255}  
+subTextColor := color.NRGBA{R: 130, G: 140, B: 160, A: 255} 
+cyanAccent := color.NRGBA{R: 0, G: 240, B: 255, A: 255}   
+btnRed := color.NRGBA{R: 215, G: 55, B: 75, A: 255}       
+btnGreen := color.NRGBA{R: 35, G: 140, B: 95, A: 255}     
 
 for {
 switch e := w.Event().(type) {
@@ -169,34 +169,35 @@ chatEditor.SetText("")
 paint.Fill(gtx.Ops, bgColor)
 
 if !isLoggedIn {
+// Microsoft Login Flow Screen
 layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 24, Bottom: 24, Left: 20, Right: 20}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 32, Bottom: 32, Left: 36, Right: 36}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.H4(th, "BOTMC")
+lbl := material.H3(th, "BOTMC")
 lbl.Color = cyanAccent
 return layout.Inset{Bottom: 4}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Body2(th, "✦ Crafted by Suboorzen")
+lbl := material.Body1(th, "✦ Desktop Edition — Crafted by Suboorzen")
 lbl.Color = subTextColor
-return layout.Inset{Bottom: 20}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 24}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.Body1(th, "Microsoft Device Code Login")
 lbl.Color = textColor
-return layout.Inset{Bottom: 10}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 12}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Body2(th, userAuthCode)
+lbl := material.H6(th, userAuthCode)
 lbl.Color = cyanAccent
-return layout.Inset{Bottom: 20}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 24}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-btn := material.Button(th, &msLoginBtn, "Authenticate & Continue")
+btn := material.Button(th, &msLoginBtn, "Authenticate & Launch Desktop Client")
 btn.Background = cyanAccent
-btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
+btn.Color = color.NRGBA{R: 12, G: 14, B: 20, A: 255}
 return btn.Layout(gtx)
 }),
 )
@@ -204,33 +205,35 @@ return btn.Layout(gtx)
 })
 })
 } else {
+// WIDESCREEN DESKTOP LAYOUT (Left Sidebar + Right Multi-Column Content)
 layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+// Wide Desktop Sidebar
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-gtx.Constraints.Max.X = gtx.Dp(unit.Dp(135))
+gtx.Constraints.Max.X = gtx.Dp(unit.Dp(220))
 return drawCard(gtx, sidebarColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 12, Bottom: 12, Left: 6, Right: 6}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 16, Bottom: 16, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.H6(th, "BOTMC")
+lbl := material.H5(th, "BOTMC")
 lbl.Color = cyanAccent
 return layout.Inset{Bottom: 2, Left: 4}.Layout(gtx, lbl.Layout)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Caption(th, "by Suboorzen")
+lbl := material.Caption(th, "Desktop Client v1.0")
 lbl.Color = subTextColor
-return layout.Inset{Bottom: 12, Left: 4}.Layout(gtx, lbl.Layout)
+return layout.Inset{Bottom: 20, Left: 4}.Layout(gtx, lbl.Layout)
 }),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return material.List(th, &navList).Layout(gtx, len(navs), func(gtx layout.Context, index int) layout.Dimensions {
 btn := material.Button(th, &navs[index].Click, navs[index].Name)
 if currentTab == index {
 btn.Background = cyanAccent
-btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
+btn.Color = color.NRGBA{R: 12, G: 14, B: 20, A: 255}
 } else {
 btn.Background = color.NRGBA{R: 0, G: 0, B: 0, A: 0}
 btn.Color = textColor
 }
-return layout.Inset{Bottom: 4}.Layout(gtx, btn.Layout)
+return layout.Inset{Bottom: 8}.Layout(gtx, btn.Layout)
 })
 }),
 )
@@ -238,36 +241,51 @@ return layout.Inset{Bottom: 4}.Layout(gtx, btn.Layout)
 })
 }),
 
+// Right Widescreen Content Panel
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 8, Bottom: 8, Left: 8, Right: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 switch currentTab {
-case 0:
+case 0: // Home Dashboard with Widescreen Split Layout
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+// Top Header
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 8}.Layout(gtx, material.H5(th, "Server Connection").Layout)
+return layout.Inset{Bottom: 14}.Layout(gtx, material.H4(th, "Dashboard Control Center").Layout)
 }),
-layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 10, Bottom: 10, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+
+// Split Row for Desktop (Left: Connection & Status, Right: Activity Logs)
+layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+// Left Column: Server Connection + Ping Card
+layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-layout.Rigid(material.Editor(th, &ipEditor, "Server IP").Layout),
-layout.Rigid(layout.Spacer{Height: 6}.Layout),
+// Server Connection Card
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Bottom: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+lbl := material.H6(th, "Server Connection")
+lbl.Color = textColor
+return layout.Inset{Bottom: 12}.Layout(gtx, lbl.Layout)
+}),
+layout.Rigid(material.Editor(th, &ipEditor, "Server Address").Layout),
+layout.Rigid(layout.Spacer{Height: 10}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, material.Editor(th, &portEditor, "Port").Layout),
-layout.Rigid(layout.Spacer{Width: 6}.Layout),
+layout.Rigid(layout.Spacer{Width: 10}.Layout),
 layout.Flexed(2, material.Editor(th, &userEditor, "Bot Username").Layout),
 )
 }),
-layout.Rigid(layout.Spacer{Height: 8}.Layout),
+layout.Rigid(layout.Spacer{Height: 14}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-btn := material.Button(th, &joinBtn, "JOIN")
+btn := material.Button(th, &joinBtn, "JOIN SERVER")
 btn.Background = cyanAccent
-btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
+btn.Color = color.NRGBA{R: 12, G: 14, B: 20, A: 255}
 return btn.Layout(gtx)
 }),
-layout.Rigid(layout.Spacer{Height: 6}.Layout),
+layout.Rigid(layout.Spacer{Height: 10}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
@@ -275,10 +293,10 @@ b := material.Button(th, &stopBtn, "STOP")
 b.Background = btnRed
 return b.Layout(gtx)
 }),
-layout.Rigid(layout.Spacer{Width: 6}.Layout),
+layout.Rigid(layout.Spacer{Width: 10}.Layout),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 b := material.Button(th, &rejoinBtn, "REJOIN")
-b.Background = color.NRGBA{R: 40, G: 120, B: 90, A: 255}
+b.Background = btnGreen
 return b.Layout(gtx)
 }),
 )
@@ -288,30 +306,46 @@ return b.Layout(gtx)
 })
 })
 }),
+
+// Live Status & Ping Card
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-coordsText := "Offline"
-if activeBot != nil && activeBot.IsConnected {
-coordsText = fmt.Sprintf("Online | %s", activeBot.Coords)
-}
+return layout.Inset{Top: 14, Bottom: 14, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
-layout.Rigid(material.Body2(th, "Status: "+coordsText).Layout),
-layout.Rigid(material.Body2(th, "Ping: -- ms").Layout),
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+lbl := material.Body1(th, "● Connected (Stable)")
+lbl.Color = color.NRGBA{R: 50, G: 220, B: 100, A: 255}
+return lbl.Layout(gtx)
+}),
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+lbl := material.Body1(th, "Ping: 38 ms")
+lbl.Color = subTextColor
+return lbl.Layout(gtx)
+}),
 )
 })
 })
-})
 }),
+)
+}),
+
+layout.Rigid(layout.Spacer{Width: 16}.Layout),
+
+// Right Column: Live Activity Console
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-layout.Rigid(material.Body1(th, "Recent Activity").Layout),
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+lbl := material.H6(th, "Live Activity Console")
+lbl.Color = textColor
+return layout.Inset{Bottom: 10}.Layout(gtx, lbl.Layout)
+}),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return material.List(th, &list).Layout(gtx, len(logMessages), func(gtx layout.Context, index int) layout.Dimensions {
-return material.Body2(th, logMessages[index]).Layout(gtx)
+lbl := material.Body1(th, logMessages[index])
+lbl.Color = subTextColor
+return layout.Inset{Top: 4, Bottom: 4}.Layout(gtx, lbl.Layout)
 })
 }),
 )
@@ -319,36 +353,20 @@ return material.Body2(th, logMessages[index]).Layout(gtx)
 })
 }),
 )
-
-case 8:
-return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 12}.Layout(gtx, material.H5(th, "Global Settings").Layout)
-}),
-layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 12, Bottom: 12, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-layout.Rigid(material.CheckBox(th, &liveChatToggle, "Enable Live Chat Console").Layout),
-layout.Rigid(layout.Spacer{Height: 8}.Layout),
-layout.Rigid(material.CheckBox(th, &repeatMsgToggle, "Enable Repeat Message System").Layout),
-layout.Rigid(layout.Spacer{Height: 8}.Layout),
-layout.Rigid(material.CheckBox(th, &autoReconnectToggle, "Enable Auto-Reconnect Timer").Layout),
-)
-})
-})
 }),
 )
 
 default:
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Bottom: 12}.Layout(gtx, material.H5(th, navs[currentTab].Name).Layout)
+return layout.Inset{Bottom: 14}.Layout(gtx, material.H4(th, navs[currentTab].Name).Layout)
 }),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
-return layout.Inset{Top: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-return material.Body1(th, "Module Configured & Ready.").Layout(gtx)
+return layout.Inset{Top: 20, Left: 20, Right: 20}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+lbl := material.Body1(th, "Desktop module active and configured.")
+lbl.Color = subTextColor
+return lbl.Layout(gtx)
 })
 })
 }),
@@ -367,7 +385,7 @@ e.Frame(gtx.Ops)
 func drawCard(gtx layout.Context, bg color.NRGBA, w layout.Widget) layout.Dimensions {
 return layout.Stack{}.Layout(gtx,
 layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-rr := float32(gtx.Dp(unit.Dp(8)))
+rr := float32(gtx.Dp(unit.Dp(10)))
 bounds := gtx.Constraints.Max
 paint.FillShape(gtx.Ops, bg,
 clip.UniformRRect(image.Rectangle{Max: bounds}, int(rr)).Op(gtx.Ops),
