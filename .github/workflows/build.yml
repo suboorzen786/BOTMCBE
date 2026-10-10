@@ -17,26 +17,24 @@ jobs:
       with:
         go-version: '1.22'
 
-    - name: Install System CGO Dependencies
+    - name: Install System Dependencies & Java
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev libx11-dev xorg-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev
+        sudo apt-get install -y libgl1-mesa-dev libx11-dev xorg-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev openjdk-17-jdk
+
+    - name: Install Official Gio Tool
+      run: |
+        go install gioui.org/cmd/gio@latest
+        export PATH=$PATH:$(go env GOPATH)/bin
 
     - name: Clean & Tidy Dependencies
       run: |
         go mod tidy
 
-    - name: Install Gomobile Tools
-      run: |
-        go install golang.org/x/mobile/cmd/gomobile@latest
-        go install golang.org/x/mobile/cmd/gobind@latest
-        export PATH=$PATH:$(go env GOPATH)/bin
-        gomobile init
-
-    - name: Compile Android APK
+    - name: Build Android APK with Gio
       run: |
         export PATH=$PATH:$(go env GOPATH)/bin
-        gomobile build -androidapi 21 -target=android -o botmc.apk .
+        gio android -o botmc.apk .
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
