@@ -29,7 +29,7 @@ func main() {
 go func() {
 w := new(app.Window)
 w.Option(app.Title("BOTMC - Desktop Edition"))
-w.Option(app.Size(1280, 800)) // Force Desktop Widescreen Resolution
+w.Option(app.Size(1280, 800))
 if err := run(w); err != nil {
 log.Fatal(err)
 }
@@ -86,7 +86,6 @@ var list, navList widget.List
 list.Axis = layout.Vertical
 navList.Axis = layout.Vertical
 
-// Desktop Cyberpunk Theme Palette
 bgColor := color.NRGBA{R: 10, G: 12, B: 18, A: 255}       
 sidebarColor := color.NRGBA{R: 14, G: 18, B: 26, A: 255}  
 cardColor := color.NRGBA{R: 20, G: 25, B: 38, A: 255}     
@@ -191,9 +190,7 @@ return btn.Layout(gtx)
 })
 })
 } else {
-// DESKTOP WIDESCREEN LAYOUT (Wide Sidebar + Multi-Column Dashboard)
 layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-// Wide Desktop Sidebar
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 gtx.Constraints.Max.X = gtx.Dp(unit.Dp(240))
 return drawCard(gtx, sidebarColor, func(gtx layout.Context) layout.Dimensions {
@@ -227,20 +224,17 @@ return layout.Inset{Bottom: 8}.Layout(gtx, btn.Layout)
 })
 }),
 
-// Widescreen Right Content Area
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 switch currentTab {
-case 0: // Desktop Home Dashboard
+case 0:
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Bottom: 16}.Layout(gtx, material.H4(th, "Desktop Control Center").Layout)
 }),
 
-// Two-Column Widescreen Split Layout
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-// Left Column: Server Connection & Status
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -258,15 +252,18 @@ lbl := material.Body2(th, "Configure your Minecraft Bedrock server parameters")
 lbl.Color = subTextColor
 return layout.Inset{Bottom: 14}.Layout(gtx, lbl.Layout)
 }),
-drawCard(gtx, inputBgColor, func(gtx layout.Context) layout.Dimensions {
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return drawCard(gtx, inputBgColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 ed := material.Editor(th, &ipEditor, "Server Address")
 ed.Color = textColor
 return ed.Layout(gtx)
 })
+})
 }),
 layout.Rigid(layout.Spacer{Height: 10}.Layout),
-layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, inputBgColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 8, Bottom: 8, Left: 10, Right: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -286,7 +283,8 @@ return ed.Layout(gtx)
 })
 })
 }),
-),
+)
+}),
 layout.Rigid(layout.Spacer{Height: 14}.Layout),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 btn := material.Button(th, &joinBtn, "JOIN SERVER")
@@ -295,7 +293,8 @@ btn.Color = color.NRGBA{R: 10, G: 12, B: 18, A: 255}
 return btn.Layout(gtx)
 }),
 layout.Rigid(layout.Spacer{Height: 10}.Layout),
-layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 b := material.Button(th, &stopBtn, "STOP")
 b.Background = btnRed
@@ -307,7 +306,8 @@ b := material.Button(th, &rejoinBtn, "REJOIN")
 b.Background = btnGreen
 return b.Layout(gtx)
 }),
-),
+)
+}),
 )
 })
 })
@@ -336,7 +336,6 @@ return lbl.Layout(gtx)
 
 layout.Rigid(layout.Spacer{Width: 16}.Layout),
 
-// Right Column: Live Activity Console
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 16, Bottom: 16, Left: 16, Right: 16}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -370,7 +369,6 @@ return layout.Inset{Top: 6, Bottom: 6}.Layout(gtx, lbl.Layout)
 )
 }),
 
-// Desktop Footer
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 10}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 lbl := material.Caption(th, "✦ Desktop Edition — Crafted by Suboorzen")
