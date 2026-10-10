@@ -369,7 +369,7 @@ return layout.Inset{Bottom: 10}.Layout(gtx, lbl.Layout)
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 lbl := material.Body1(th, "• Recurrent Timer: Minutes & Seconds Dial")
 lbl.Color = textColor
-return lbl.Layout(gtx)
+return layout.Inset{Bottom: 10}.Layout(gtx, lbl.Layout)
 }),
 )
 })
