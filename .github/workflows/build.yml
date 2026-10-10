@@ -29,7 +29,7 @@ jobs:
       - name: Build APK
         run: |
           export ANDROID_HOME="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-          gogio -target android -appid com.suboorzen.botmc -o botmc.apk .
+          gogio -ldflags="-checklinkname=0" -target android -appid com.suboorzen.botmc -o botmc.apk .
 
       - uses: actions/upload-artifact@v4
         with:
