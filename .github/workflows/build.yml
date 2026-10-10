@@ -22,19 +22,24 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libgl1-mesa-dev libx11-dev xorg-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev openjdk-17-jdk
 
-    - name: Install Stable Gio Tool (gioc)
+    - name: Setup Android NDK
+      uses: nsysu-code/setup-android-ndk@v1
+      with:
+        ndk-version: r25c
+
+    - name: Install Pure Gio Command Tool
       run: |
-        go install gioui.org/cmd/gioc@v0.7.1
+        go install gioui.org/cmd/gio@v0.7.1
         export PATH=$PATH:$(go env GOPATH)/bin
 
-    - name: Clean & Tidy Dependencies
+    - name: Tidy Dependencies
       run: |
         go mod tidy
 
-    - name: Build Android APK with gioc
+    - name: Compile APK with Gio
       run: |
         export PATH=$PATH:$(go env GOPATH)/bin
-        gioc -target android -o botmc.apk .
+        gio -target android -appid com.suboorzen.botmc -o botmc.apk .
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
