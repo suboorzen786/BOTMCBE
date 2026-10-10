@@ -71,20 +71,20 @@ func main() {
 			case app.FrameEvent:
 				gtx := app.NewContext(&ops, e)
 
-				if join.Clicked() {
+				if join.Clicked(gtx) {
 					status = "Connection engine pending - not connected"
 				}
-				if stop.Clicked() {
+				if stop.Clicked(gtx) {
 					status = "Stop requested"
 				}
-				if rejoin.Clicked() {
+				if rejoin.Clicked(gtx) {
 					status = "Rejoin requested - connection engine pending"
 				}
-				if versionButton.Clicked() {
+				if versionButton.Clicked(gtx) {
 					versionIndex = (versionIndex + 1) % len(versions)
 				}
 				for i := range slots {
-					if slots[i].Clicked() {
+					if slots[i].Clicked(gtx) {
 						status = fmt.Sprintf(
 							"Selected GUI slot %d: %s",
 							i+1, slotNames[i],
