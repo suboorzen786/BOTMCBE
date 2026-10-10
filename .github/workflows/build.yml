@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: Build BOTMC APK
 
 on:
@@ -27,3 +28,29 @@ jobs:
       with:
         name: botmc-build
         path: .
+=======
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build APK
+        run: |
+          export ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}
+          go run gioui.org/cmd/gogio@v0.10.3 -target android -arch arm64 -appid com.suboorzen.botmc -o BOTMC.apk .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BOTMC-apk
+          path: BOTMC.apk
+>>>>>>> 5a9a5d367f06ea9c01842d8a0cd07de70acdc972
