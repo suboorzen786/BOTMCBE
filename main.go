@@ -8,7 +8,6 @@ import (
 
 "gioui.org/app"
 "gioui.org/font/gofont"
-"gioui.org/io/pointer"
 "gioui.org/layout"
 "gioui.org/op"
 "gioui.org/op/clip"
@@ -78,9 +77,6 @@ var list, playerList widget.List
 list.Axis = layout.Vertical
 playerList.Axis = layout.Vertical
 
-var touchStartX float32
-var swipeTag int
-
 bgColor := color.NRGBA{R: 20, G: 22, B: 28, A: 255}
 headerColor := color.NRGBA{R: 190, G: 40, B: 40, A: 255}
 cardColor := color.NRGBA{R: 30, G: 35, B: 45, A: 255}
@@ -95,29 +91,6 @@ case app.DestroyEvent:
 return e.Err
 case app.FrameEvent:
 gtx := app.NewContext(&ops, e)
-
-for {
-ev, ok := gtx.Event(pointer.Filter{
-Target: &swipeTag,
-Kinds:  pointer.Press | pointer.Release,
-})
-if !ok {
-break
-}
-if pe, ok := ev.(pointer.Event); ok {
-switch pe.Kind {
-case pointer.Press:
-touchStartX = pe.Position.X
-case pointer.Release:
-diffX := pe.Position.X - touchStartX
-if currentTab == 1 && diffX < -80 {
-currentTab = 3
-} else if currentTab == 3 && diffX > 80 {
-currentTab = 1
-}
-}
-}
-}
 
 if navServers.Clicked(gtx) { currentTab = 0 }
 if navChat.Clicked(gtx) { currentTab = 1 }
@@ -249,12 +222,6 @@ return btn.Layout(gtx)
 )
 
 case 1:
-defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Push(gtx.Ops).Pop()
-pointer.Filter{
-Target: &swipeTag,
-Kinds:  pointer.Press | pointer.Release,
-}.Add(gtx.Ops)
-
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
@@ -266,7 +233,7 @@ lbl.Color = color.NRGBA{R: 50, G: 220, B: 100, A: 255}
 return lbl.Layout(gtx)
 }),
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-lbl := material.Caption(th, "Ping: 35 ms | Swipe for Minimap >")
+lbl := material.Caption(th, "Ping: 35 ms | Use top/bottom nav")
 lbl.Color = cyanAccent
 return lbl.Layout(gtx)
 }),
@@ -336,12 +303,6 @@ return layout.Inset{Top: 6, Bottom: 6}.Layout(gtx, lbl.Layout)
 )
 
 case 3:
-defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Push(gtx.Ops).Pop()
-pointer.Filter{
-Target: &swipeTag,
-Kinds:  pointer.Press | pointer.Release,
-}.Add(gtx.Ops)
-
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
