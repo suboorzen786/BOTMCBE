@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BOTMC PRO</string>
+    <string name="title_activity_main">BOTMC PRO</string>
+    <string name="package_name">com.suboorzen.botmcbe</string>
+    <string name="custom_url_scheme">com.suboorzen.botmcbe</string>
+</resources>

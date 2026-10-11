@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14161c">
+<title>BOTMC PRO</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #14161c;
+  --card: #202631;
+  --accent: #00f0ff;
+  --muted: #a6b0bf;
+  --red: #ff5263;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: white;
+  font-family: system-ui, sans-serif;
+}
+header {
+  padding: 18px 16px;
+  background: #191d25;
+  border-bottom: 1px solid #303947;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+.logo span { color: var(--accent); }
+.tag { color: var(--muted); font-size: 11px; margin-top: 3px; }
+main { max-width: 700px; margin: auto; padding: 16px; }
+.card {
+  background: var(--card);
+  border: 1px solid #303947;
+  border-radius: 15px;
+  padding: 16px;
+  margin-bottom: 15px;
+}
+h2 { font-size: 16px; margin: 0 0 14px; }
+label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 6px; }
+input {
+  width: 100%; padding: 13px;
+  color: white; background: #151a22;
+  border: 1px solid #3a4656; border-radius: 9px;
+  font-size: 14px; outline: none;
+}
+input:focus { border-color: var(--accent); }
+.row { display: flex; gap: 10px; }
+.row > div { flex: 1; min-width: 0; }
+button {
+  padding: 12px 10px; border: 0; border-radius: 9px;
+  background: var(--accent); color: #10151a;
+  font-weight: 800; font-size: 13px; cursor: pointer;
+}
+button:disabled { opacity: .45; cursor: not-allowed; }
+.actions { display: flex; gap: 8px; margin-top: 14px; }
+.actions button { flex: 1; }
+.secondary { background: #344050; color: white; }
+.stop { background: var(--red); color: white; }
+.status {
+  display: flex; align-items: center; gap: 9px;
+  color: var(--muted); font-size: 13px;
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #77808d; }
+.note { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; }
+.tabs button { flex-shrink: 0; background: #29313e; color: white; }
+.tabs button.active { background: var(--accent); color: #10151a; }
+.panel { min-height: 100px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+footer { text-align: center; padding: 10px 16px 25px; color: #697586; font-size: 11px; }
+@media (max-width: 380px) {
+  main { padding: 10px; }
+  .card { padding: 13px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">BOTMC <span>PRO</span></div>
+    <div class="tag">MCPE / BEDROCK BOT CONTROL</div>
+  </div>
+  <div style="color:var(--red);font-size:12px;font-weight:800">● OFFLINE</div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>🔐 Account</h2>
+    <div class="status"><span class="dot"></span><span id="account">Microsoft account: Not connected</span></div>
+    <p class="note">Real Microsoft authentication abhi configure nahi hui hai. Apna password is page par enter mat karna.</p>
+  </section>
+
+  <section class="card">
+    <h2>🌐 Bedrock Server</h2>
+    <label for="serverName">Server name</label>
+    <input id="serverName" placeholder="My MCPE Server">
+    <label for="host">Server IP / Address</label>
+    <input id="host" placeholder="play.example.net" autocomplete="off">
+    <div class="row">
+      <div>
+        <label for="port">Port</label>
+        <input id="port" type="number" min="1" max="65535" value="19132">
+      </div>
+      <div>
+        <label for="username">Bot gamertag</label>
+        <input id="username" placeholder="Your bot name" maxlength="16">
+      </div>
+    </div>
+    <div class="actions">
+      <button id="join">Join</button>
+      <button id="stop" class="stop" disabled>Stop</button>
+      <button id="rejoin" class="secondary">Rejoin</button>
+    </div>
+    <p class="note" id="connection">Not connected. Real Bedrock backend is not configured yet.</p>
+  </section>
+
+  <section class="card">
+    <h2>🎮 Bot Console</h2>
+    <div class="tabs" id="tabs">
+      <button class="active" data-panel="chat">💬 Chat</button>
+      <button data-panel="map">🗺️ Map</button>
+      <button data-panel="players">👥 Players</button>
+      <button data-panel="inventory">🎒 Inventory</button>
+    </div>
+    <div class="panel" id="panel">Chat messages will appear here after a real Bedrock connection is implemented.</div>
+  </section>
+
+  <section class="card">
+    <h2>🔁 Repeat Selector</h2>
+    <p class="note">Independent repeating tasks with intervals and ON/OFF controls will be connected to the backend in a later step.</p>
+    <div class="row">
+      <div><label for="interval">Interval</label><input id="interval" type="number" min="1" max="60" value="5"></div>
+      <div><label for="unit">Unit</label><input id="unit" value="seconds" disabled></div>
+    </div>
+    <p class="note" id="repeatStatus">No task running.</p>
+  </section>
+
+  <section class="card">
+    <h2>⚡ Triggers</h2>
+    <p class="note">Event-based triggers will only run when real server events are received by the backend. No simulated events.</p>
+  </section>
+
+  <section class="card">
+    <h2>⚙️ Settings</h2>
+    <label><input id="save" type="checkbox" checked style="width:auto;vertical-align:middle"> Save server details on this device</label>
+    <p class="note">Saved server details stay in this browser. Don't save account passwords here.</p>
+    <button id="clear" class="secondary">Clear saved server details</button>
+  </section>
+</main>
+
+<footer>BOTMC PRO · Web development build</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fields = ['serverName', 'host', 'port', 'username'];
+const saved = (() => {
+  try { return JSON.parse(localStorage.getItem('botmc.server') || '{}'); }
+  catch { return {}; }
+})();
+fields.forEach(id => { if (saved[id] !== undefined) $(id).value = saved[id]; });
+
+function saveServer() {
+  if (!$('save').checked) return;
+  const data = {};
+  fields.forEach(id => data[id] = $(id).value);
+  localStorage.setItem('botmc.server', JSON.stringify(data));
+}
+fields.forEach(id => $(id).addEventListener('change', saveServer));
+$('save').addEventListener('change', saveServer);
+$('clear').addEventListener('click', () => {
+  localStorage.removeItem('botmc.server');
+  fields.forEach(id => $(id).value = id === 'port' ? '19132' : '');
+  $('connection').textContent = 'Saved server details cleared.';
+});
+
+const panels = {
+  chat: 'Chat messages will appear here after a real Bedrock connection is implemented.',
+  map: 'Map and coordinates are unavailable until a real Bedrock session provides position data.',
+  players: 'Player list is unavailable until the backend receives actual player data.',
+  inventory: 'Inventory is unavailable until the backend receives actual inventory data.'
+};
+$('tabs').addEventListener('click', event => {
+  const button = event.target.closest('button[data-panel]');
+  if (!button) return;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === button));
+  $('panel').textContent = panels[button.dataset.panel];
+});
+
+async function refreshStatus() {
+  try {
+    const response = await fetch('/api/status');
+    const data = await response.json();
+    $('connection').textContent = data.message;
+  } catch {
+    $('connection').textContent = 'Backend unavailable.';
+  }
+}
+$('join').addEventListener('click', async () => {
+  saveServer();
+  if (!$('host').value.trim()) {
+    $('connection').textContent = 'Enter the MCPE server address first.';
+    $('host').focus();
+    return;
+  }
+  $('connection').textContent = 'Cannot connect yet: real Bedrock protocol backend is not configured.';
+});
+$('rejoin').addEventListener('click', () => {
+  $('connection').textContent = 'Rejoin unavailable: no active Bedrock session or configured backend.';
+});
+$('stop').addEventListener('click', () => {
+  $('connection').textContent = 'No active Bedrock session to stop.';
+});
+refreshStatus();
+</script>
+</body>
+</html>

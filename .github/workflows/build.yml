@@ -1,43 +1,44 @@
-name: Build MCBE BOT APK
+name: Build BOTMC PRO APK
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Setup Go Environment
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.25.0'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
 
-    - name: Install System Dependencies & Java
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev libx11-dev openjdk-17-jdk
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
 
-    - name: Install Gogio Compiler Tool
-      run: |
-        go install gioui.org/cmd/gogio@v0.10.3
-        export PATH=$PATH:$(go env GOPATH)/bin
+      - name: Install Dependencies
+        run: npm ci
 
-    - name: Tidy Dependencies
-      run: |
-        go mod tidy
+      - name: Sync Capacitor Android
+        run: npx cap sync android
 
-    - name: Build Android APK with Gogio
-      run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        gogio -target android -appid com.suboorzen.botmc -o botmc.apk .
+      - name: Build Android APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: botmc-apk
-        path: botmc.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BOTMC-PRO-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
