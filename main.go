@@ -279,7 +279,7 @@ func run(w *app.Window) error {
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 										layout.Flexed(1, material.Editor(th, &chatEditor, "Type message...").Layout),
-										layout.Spacer{Width: 6},
+										layout.Rigid(layout.Spacer{Width: 6}.Layout),
 										layout.Rigid(material.Button(th, &sendChatBtn, "Send").Layout),
 									)
 								}),
@@ -301,4 +301,3 @@ func drawCard(gtx layout.Context, bg color.NRGBA, w layout.Widget) layout.Dimens
 	call.Add(gtx.Ops)
 	return dims
 }
-
