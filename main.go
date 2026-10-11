@@ -82,7 +82,7 @@ func run(w *app.Window) error {
 	cyanAccent := color.NRGBA{R: 0, G: 240, B: 255, A: 255}
 
 	for {
-		switch e := e := w.Event().(type) {
+		switch e := w.Event().(type) {
 		case app.DestroyEvent:
 			return e.Err
 		case app.FrameEvent:
