@@ -1,77 +1,156 @@
 package bot
 
 import (
-"fmt"
-"time"
+	"context"
+	"fmt"
+	"net"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/sandertv/gophertunnel/minecraft"
 )
 
 type BotSession struct {
-ServerIP    string
-ServerPort  string
-Username    string
-Version     string
-IsConnected bool
-Coords      string
-logChan     chan<- string
-stopChan    chan struct{}
+	ServerIP   string
+	ServerPort string
+	Username   string
+	Version    string
+
+	IsConnected bool
+	Coords      string
+
+	logChan chan<- string
+
+	mu       sync.Mutex
+	conn     *minecraft.Conn
+	cancel   context.CancelFunc
+	stopOnce sync.Once
 }
 
 func NewBotSession(ip, port, username, version string, logChan chan<- string) *BotSession {
-return &BotSession{
-ServerIP:   ip,
-ServerPort: port,
-Username:   username,
-Version:    version,
-logChan:    logChan,
-stopChan:   make(chan struct{}),
-Coords:     "X: 0, Y: 0, Z: 0",
+	return &BotSession{
+		ServerIP:   ip,
+		ServerPort: port,
+		Username:   username,
+		Version:    version,
+		Coords:     "Position unavailable",
+		logChan:    logChan,
+	}
 }
+
+func (b *BotSession) log(message string) {
+	if b.logChan == nil {
+		return
+	}
+	select {
+	case b.logChan <- message:
+	default:
+	}
 }
 
 func (b *BotSession) Connect() {
-b.logChan <- fmt.Sprintf("[*] Connecting to %s:%s as %s...", b.ServerIP, b.ServerPort, b.Username)
+	b.mu.Lock()
+	if b.conn != nil {
+		b.mu.Unlock()
+		b.log("[!] A connection is already active.")
+		return
+	}
 
-// Simulating connection handshake for Bedrock protocol
-time.Sleep(1 * time.Second)
+	port, err := strconv.Atoi(b.ServerPort)
+	if err != nil || port < 1 || port > 65535 {
+		b.mu.Unlock()
+		b.log("[!] Invalid server port.")
+		return
+	}
 
-b.IsConnected = true
-b.logChan <- "[+] Successfully connected to the MCPE server!"
+	host := strings.TrimSpace(b.ServerIP)
+	if host == "" {
+		b.mu.Unlock()
+		b.log("[!] Enter a server address.")
+		return
+	}
 
-// Simulated game loop / position tracker
-ticker := time.NewTicker(2 * time.Second)
-defer ticker.Stop()
+	address := net.JoinHostPort(host, b.ServerPort)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	b.cancel = cancel
+	b.mu.Unlock()
 
-// Dummy coordinates increment to test live UI updates
-x, y, z := 100.0, 64.0, 200.0
+	b.log("[*] Starting real Bedrock protocol connection to " + address)
+	b.log("[!] Microsoft authentication is not configured yet. This connection does not claim to be Microsoft-authenticated.")
 
-for {
-select {
-case <-b.stopChan:
-b.logChan <- "[-] Bot disconnected."
-return
-case <-ticker.C:
-if !b.IsConnected {
-return
-}
-x += 0.5
-z += 0.5
-b.Coords = fmt.Sprintf("X: %.1f, Y: %.1f, Z: %.1f", x, y, z)
-}
-}
+	dialer := minecraft.Dialer{}
+	conn, err := dialer.DialContext(ctx, "raknet", address)
+	cancel()
+
+	if err != nil {
+		b.mu.Lock()
+		b.cancel = nil
+		b.mu.Unlock()
+		b.log(fmt.Sprintf("[-] Bedrock connection failed: %v", err))
+		return
+	}
+
+	if err := conn.DoSpawn(); err != nil {
+		_ = conn.Close()
+		b.log(fmt.Sprintf("[-] Could not enter the world: %v", err))
+		return
+	}
+
+	b.mu.Lock()
+	b.conn = conn
+	b.IsConnected = true
+	b.cancel = nil
+	b.mu.Unlock()
+
+	b.log("[+] Bedrock session established. Authentication acceptance depends on the server.")
+
+	for {
+		_, err := conn.ReadPacket()
+		if err != nil {
+			b.mu.Lock()
+			if b.conn == conn {
+				b.conn = nil
+				b.IsConnected = false
+			}
+			b.mu.Unlock()
+
+			_ = conn.Close()
+			b.log(fmt.Sprintf("[-] Bedrock session ended: %v", err))
+			return
+		}
+	}
 }
 
 func (b *BotSession) SendChat(message string) {
-if !b.IsConnected {
-b.logChan <- "[!] Cannot send chat: Bot is offline."
-return
-}
-b.logChan <- fmt.Sprintf("<%s> %s", b.Username, message)
-// Yahan par Bedrock chat packet dispatch hoga
+	b.mu.Lock()
+	connected := b.conn != nil && b.IsConnected
+	b.mu.Unlock()
+
+	if !connected {
+		b.log("[!] Chat unavailable: bot is not connected.")
+		return
+	}
+
+	b.log("[!] Chat packet sending is not implemented yet.")
 }
 
 func (b *BotSession) Disconnect() {
-if b.IsConnected {
-b.IsConnected = false
-close(b.stopChan)
-}
+	b.stopOnce.Do(func() {
+		b.mu.Lock()
+		cancel := b.cancel
+		conn := b.conn
+		b.conn = nil
+		b.IsConnected = false
+		b.mu.Unlock()
+
+		if cancel != nil {
+			cancel()
+		}
+		if conn != nil {
+			_ = conn.Close()
+			b.log("[-] Bedrock connection closed.")
+		}
+	})
 }
