@@ -90,6 +90,16 @@ body { padding-bottom: 82px; }
 }
 .bottom-nav button.active { background: #263641; color: #00f0ff; }
 
+
+.setting-row { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #303947; font-size:13px; }
+.switch { position:relative; display:inline-block; width:48px; height:27px; margin:0; flex-shrink:0; }
+.switch input { opacity:0; width:0; height:0; position:absolute; }
+.switch .slider { position:absolute; cursor:pointer; inset:0; border-radius:20px; background:#46505e; transition:.2s; }
+.switch .slider:before { content:""; position:absolute; width:19px; height:19px; left:4px; top:4px; border-radius:50%; background:white; transition:.2s; }
+.switch input:checked + .slider { background:#00b8c5; }
+.switch input:checked + .slider:before { transform:translateX(21px); }
+.switch input:focus-visible + .slider { outline:2px solid white; outline-offset:2px; }
+
 </style>
 </head>
 <body>
@@ -145,23 +155,67 @@ body { padding-bottom: 82px; }
 
   <section class="card">
     <h2>🔁 Repeat Selector</h2>
-    <p class="note">Independent repeating tasks with intervals and ON/OFF controls will be connected to the backend in a later step.</p>
+    <p class="note">Set each message and timer separately. Saving and actual sending will be connected in later steps.</p>
+    <div class="setting-row"><strong>Task 1</strong><label class="switch"><input id="repeat1Enabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="repeat1Message">Message 1</label>
+    <input id="repeat1Message" type="text" placeholder="Enter message or command">
     <div class="row">
-      <div><label for="interval">Interval</label><input id="interval" type="number" min="1" max="60" value="5"></div>
-      <div><label for="unit">Unit</label><input id="unit" value="seconds" disabled></div>
+      <div><label for="repeat1Interval">Interval (1–60)</label><input id="repeat1Interval" type="number" min="1" max="60" value="5"></div>
+      <div><label for="repeat1Unit">Time unit</label><select id="repeat1Unit"><option value="seconds">Seconds</option><option value="minutes">Minutes</option></select></div>
     </div>
-    <p class="note" id="repeatStatus">No task running.</p>
+    <div class="setting-row"><strong>Task 2</strong><label class="switch"><input id="repeat2Enabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="repeat2Message">Message 2</label>
+    <input id="repeat2Message" type="text" placeholder="Enter message or command">
+    <div class="row">
+      <div><label for="repeat2Interval">Interval (1–60)</label><input id="repeat2Interval" type="number" min="1" max="60" value="10"></div>
+      <div><label for="repeat2Unit">Time unit</label><select id="repeat2Unit"><option value="seconds">Seconds</option><option value="minutes">Minutes</option></select></div>
+    </div>
+    <div class="setting-row"><strong>Task 3</strong><label class="switch"><input id="repeat3Enabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="repeat3Message">Message 3</label>
+    <input id="repeat3Message" type="text" placeholder="Enter message or command">
+    <div class="row">
+      <div><label for="repeat3Interval">Interval (1–60)</label><input id="repeat3Interval" type="number" min="1" max="60" value="15"></div>
+      <div><label for="repeat3Unit">Time unit</label><select id="repeat3Unit"><option value="seconds">Seconds</option><option value="minutes">Minutes</option></select></div>
+    </div>
+    <p class="note" id="repeatStatus">Tasks are not connected to a live Bedrock session yet.</p>
   </section>
 
   <section class="card">
     <h2>⚡ Triggers</h2>
-    <p class="note">Event-based triggers will only run when real server events are received by the backend. No simulated events.</p>
+    <p class="note">Set phrases and replies. These are saved locally; live event handling needs the Bedrock backend.</p>
+    <div class="setting-row"><strong>Trigger 1</strong><label class="switch"><input id="trigger1Enabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="trigger1Phrase">When chat contains</label>
+    <input id="trigger1Phrase" maxlength="200" placeholder="Enter trigger phrase">
+    <label for="trigger1Reply">Reply</label>
+    <input id="trigger1Reply" maxlength="500" placeholder="Enter reply">
+    <div class="setting-row"><strong>Trigger 2</strong><label class="switch"><input id="trigger2Enabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="trigger2Phrase">When chat contains</label>
+    <input id="trigger2Phrase" maxlength="200" placeholder="Enter trigger phrase">
+    <label for="trigger2Reply">Reply</label>
+    <input id="trigger2Reply" maxlength="500" placeholder="Enter reply">
+    <div class="setting-row"><strong>Trigger 3</strong><label class="switch"><input id="trigger3Enabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="trigger3Phrase">When chat contains</label>
+    <input id="trigger3Phrase" maxlength="200" placeholder="Enter trigger phrase">
+    <label for="trigger3Reply">Reply</label>
+    <input id="trigger3Reply" maxlength="500" placeholder="Enter reply">
+    <p class="note" id="triggerStatus">Trigger settings are not connected to live server events yet.</p>
   </section>
 
   <section class="card">
     <h2>⚙️ Settings</h2>
-    <label><input id="save" type="checkbox" checked style="width:auto;vertical-align:middle"> Save server details on this device</label>
-    <p class="note">Saved server details stay in this browser. Don't save account passwords here.</p>
+    <p class="note">Preferences automatically save on this device.</p>
+    <div class="setting-row"><span>💾 Save server details</span><label class="switch"><input id="save" type="checkbox" checked><span class="slider"></span></label></div>
+    <div class="setting-row"><span>🔐 Require Microsoft login</span><label class="switch"><input id="requireLogin" type="checkbox" checked><span class="slider"></span></label></div>
+    <div class="setting-row"><span>🔄 Auto reconnect</span><label class="switch"><input id="autoReconnect" type="checkbox"><span class="slider"></span></label></div>
+    <div class="setting-row"><span>💬 Auto-login message</span><label class="switch"><input id="autoMessageEnabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="autoMessageText">Message to send after joining</label>
+    <input id="autoMessageText" type="text" maxlength="500" placeholder="Enter your auto-login message">
+    <div class="setting-row"><span>⌨️ Command after login</span><label class="switch"><input id="afterLoginEnabled" type="checkbox"><span class="slider"></span></label></div>
+    <label for="afterLoginCommand">Command to run after login</label>
+    <input id="afterLoginCommand" type="text" maxlength="500" placeholder="Enter command, e.g. server survival">
+    <div class="setting-row"><span>🔁 Repeat messages</span><label class="switch"><input id="repeatEnabled" type="checkbox"><span class="slider"></span></label></div>
+    <div class="setting-row"><span>⚡ Triggers</span><label class="switch"><input id="triggersEnabled" type="checkbox"><span class="slider"></span></label></div>
+    <p class="note" id="settingsStatus">Settings ready.</p>
     <button id="clear" class="secondary">Clear saved server details</button>
   </section>
 </main>
@@ -180,6 +234,133 @@ body { padding-bottom: 82px; }
 <script>
 const $ = id => document.getElementById(id);
 const fields = ['serverName', 'host', 'port', 'username'];
+
+const settingIds = ['save', 'requireLogin', 'autoReconnect', 'autoMessageEnabled', 'afterLoginEnabled', 'repeatEnabled', 'triggersEnabled'];
+const settingsKey = 'botmc.settings';
+const repeatFieldIds = [
+  'repeat1Enabled', 'repeat1Message', 'repeat1Interval', 'repeat1Unit',
+  'repeat2Enabled', 'repeat2Message', 'repeat2Interval', 'repeat2Unit',
+  'repeat3Enabled', 'repeat3Message', 'repeat3Interval', 'repeat3Unit'
+];
+const repeatStorageKey = 'botmc.repeatTasks';
+const customTextIds = ['autoMessageText', 'afterLoginCommand'];
+const customTextKey = 'botmc.customTexts';
+const triggerFieldIds = [
+  'trigger1Enabled', 'trigger1Phrase', 'trigger1Reply',
+  'trigger2Enabled', 'trigger2Phrase', 'trigger2Reply',
+  'trigger3Enabled', 'trigger3Phrase', 'trigger3Reply'
+];
+const triggerStorageKey = 'botmc.triggers';
+
+function loadTriggers() {
+  try {
+    const data = JSON.parse(localStorage.getItem(triggerStorageKey) || '{}');
+    triggerFieldIds.forEach(id => {
+      if (data[id] === undefined) return;
+      if ($(id).type === 'checkbox') $(id).checked = Boolean(data[id]);
+      else $(id).value = data[id];
+    });
+  } catch {}
+}
+
+function saveTriggers() {
+  const data = {};
+  triggerFieldIds.forEach(id => {
+    data[id] = $(id).type === 'checkbox' ? $(id).checked : $(id).value;
+  });
+  try {
+    localStorage.setItem(triggerStorageKey, JSON.stringify(data));
+    $('triggerStatus').textContent = '✓ Trigger settings saved on this device. Live events are not connected yet.';
+  } catch {
+    $('triggerStatus').textContent = 'Could not save trigger settings.';
+  }
+}
+
+loadTriggers();
+triggerFieldIds.forEach(id => $(id).addEventListener('change', saveTriggers));
+triggerFieldIds.filter(id => !id.endsWith('Enabled')).forEach(id =>
+  $(id).addEventListener('input', saveTriggers)
+);
+
+
+function loadCustomTexts() {
+  try {
+    const data = JSON.parse(localStorage.getItem(customTextKey) || '{}');
+    customTextIds.forEach(id => {
+      if (typeof data[id] === 'string') $(id).value = data[id];
+    });
+  } catch {}
+}
+
+function saveCustomTexts() {
+  const data = {};
+  customTextIds.forEach(id => data[id] = $(id).value);
+  try {
+    localStorage.setItem(customTextKey, JSON.stringify(data));
+    $('settingsStatus').textContent = '✓ Settings saved on this device.';
+  } catch {
+    $('settingsStatus').textContent = 'Could not save text settings.';
+  }
+}
+
+loadCustomTexts();
+customTextIds.forEach(id => $(id).addEventListener('input', saveCustomTexts));
+
+
+function loadRepeatTasks() {
+  try {
+    const data = JSON.parse(localStorage.getItem(repeatStorageKey) || '{}');
+    repeatFieldIds.forEach(id => {
+      if (data[id] === undefined) return;
+      if ($(id).type === 'checkbox') $(id).checked = Boolean(data[id]);
+      else $(id).value = data[id];
+    });
+  } catch {}
+}
+
+function saveRepeatTasks() {
+  const data = {};
+  repeatFieldIds.forEach(id => {
+    data[id] = $(id).type === 'checkbox' ? $(id).checked : $(id).value;
+  });
+  try {
+    localStorage.setItem(repeatStorageKey, JSON.stringify(data));
+    $('repeatStatus').textContent = '✓ Repeat task settings saved on this device. Live sending is not connected yet.';
+  } catch {
+    $('repeatStatus').textContent = 'Could not save repeat task settings.';
+  }
+}
+
+loadRepeatTasks();
+repeatFieldIds.forEach(id => $(id).addEventListener('change', saveRepeatTasks));
+repeatFieldIds.filter(id => id.endsWith('Message')).forEach(id =>
+  $(id).addEventListener('input', saveRepeatTasks)
+);
+
+
+function loadSettings() {
+  try {
+    const data = JSON.parse(localStorage.getItem(settingsKey) || '{}');
+    settingIds.forEach(id => {
+      if (typeof data[id] === 'boolean') $(id).checked = data[id];
+    });
+  } catch {}
+}
+
+function saveSettings() {
+  const data = {};
+  settingIds.forEach(id => data[id] = $(id).checked);
+  try {
+    localStorage.setItem(settingsKey, JSON.stringify(data));
+    $('settingsStatus').textContent = '✓ Settings saved on this device.';
+  } catch {
+    $('settingsStatus').textContent = 'Could not save settings.';
+  }
+}
+
+loadSettings();
+settingIds.forEach(id => $(id).addEventListener('change', saveSettings));
+
 const saved = (() => {
   try { return JSON.parse(localStorage.getItem('botmc.server') || '{}'); }
   catch { return {}; }

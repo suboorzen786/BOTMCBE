@@ -2,7 +2,7 @@ name: Build BOTMC PRO APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
