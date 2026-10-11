@@ -264,9 +264,8 @@ return b.Layout(gtx)
 )
 }),
 layout.Rigid(layout.Spacer{Height: 6}.Layout),
-func() layout.Widget {
-if !isAddingServer { return func(gtx layout.Context) layout.Dimensions { return layout.Dimensions{} } }
-return func(gtx layout.Context) layout.Dimensions {
+layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+if !isAddingServer { return layout.Dimensions{} }
 return drawCard(gtx, cardColor, func(gtx layout.Context) layout.Dimensions {
 return layout.Inset{Top: 10, Bottom: 10, Left: 12, Right: 12}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -284,8 +283,7 @@ return b.Layout(gtx)
 )
 })
 })
-}
-}(),
+}),
 layout.Rigid(layout.Spacer{Height: 4}.Layout),
 layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 if len(servers) == 0 {
