@@ -1,33 +1,69 @@
 package main
 
 import (
-"encoding/json"
-"os"
+	"encoding/json"
+	"os"
+	"path/filepath"
 )
 
-type Config struct {
-ServerIP    string `json:"server_ip"`
-ServerPort  string `json:"server_port"`
-BotUsername string `json:"bot_username"`
-MCPEVersion string `json:"mcpe_version"`
+type SavedServer struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+	Port    string `json:"port"`
 }
 
-func LoadConfig() Config {
-file, err := os.ReadFile("config.json")
-if err != nil {
-return Config{
-ServerIP:    "127.0.0.1",
-ServerPort:  "19132",
-BotUsername: "BOTMC_User",
-MCPEVersion: "1.20.0",
-}
-}
-var cfg Config
-json.Unmarshal(file, &cfg)
-return cfg
+type TriggerConfig struct {
+	Command string `json:"command"`
+	Value   int    `json:"value"`   // 1 to 60
+	IsMin   bool   `json:"is_min"`  // true = min, false = sec
 }
 
-func (c *Config) Save() {
-data, _ := json.MarshalIndent(c, "", "  ")
-os.WriteFile("config.json", data, 0644)
+type AppConfig struct {
+	IsLoggedIn      bool          `json:"is_logged_in"`
+	MicrosoftUser   string        `json:"microsoft_user"`
+	RefreshToken    string        `json:"refresh_token"`
+	AutoLogin       bool          `json:"auto_login"`
+	AutoLoginPass   string        `json:"auto_login_pass"`
+	CmdAfterLogin   bool          `json:"cmd_after_login"`
+	CmdAfterText    string        `json:"cmd_after_text"`
+	AutoMovement    bool          `json:"auto_movement"`
+	Triggers        [3]TriggerConfig `json:"triggers"`
+	Servers         []SavedServer `json:"servers"`
 }
+
+func getConfigPath() string {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		dir = "."
+	}
+	appDir := filepath.Join(dir, "botmc_pro")
+	_ = os.MkdirAll(appDir, 0755)
+	return filepath.Join(appDir, "config.json")
+}
+
+func LoadConfig() AppConfig {
+	path := getConfigPath()
+	file, err := os.ReadFile(path)
+	if err != nil {
+		// Default config if file doesn't exist
+		return AppConfig{
+			IsLoggedIn: false,
+			Servers: []SavedServer{
+				{Name: "Hypixel Network", Address: "mc.hypixel.net", Port: "19132"},
+			},
+		}
+	}
+	var cfg AppConfig
+	_ = json.Unmarshal(file, &cfg)
+	return cfg
+}
+
+func SaveConfig(cfg AppConfig) error {
+	path := getConfigPath()
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
+}
+
