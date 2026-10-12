@@ -146,9 +146,6 @@ body { padding-bottom: 82px; }
     <h2>🎮 Bot Console</h2>
     <div class="tabs" id="tabs">
       <button class="active" data-panel="chat">💬 Chat</button>
-      <button data-panel="map">🗺️ Map</button>
-      <button data-panel="players">👥 Players</button>
-      <button data-panel="inventory">🎒 Inventory</button>
     </div>
     <div class="panel" id="panel">Chat messages will appear here after a real Bedrock connection is implemented.</div>
   </section>
@@ -383,9 +380,6 @@ $('clear').addEventListener('click', () => {
 
 const panels = {
   chat: 'Chat messages will appear here after a real Bedrock connection is implemented.',
-  map: 'Map and coordinates are unavailable until a real Bedrock session provides position data.',
-  players: 'Player list is unavailable until the backend receives actual player data.',
-  inventory: 'Inventory is unavailable until the backend receives actual inventory data.'
 };
 $('tabs').addEventListener('click', event => {
   const button = event.target.closest('button[data-panel]');
@@ -431,6 +425,46 @@ document.getElementById('bottomNav').addEventListener('click', event => {
       b.classList.toggle('active', b === button));
   }
 });
+
+
+/* BOTMC_SETTINGS_PERSISTENCE_V1 */
+(() => {
+  const storageKey = 'botmc-pro-user-settings-v1';
+  const controls = () => [...document.querySelectorAll('input, select, textarea')]
+    .filter(el => el.id || el.name);
+  const keyOf = el => el.id ? 'id:' + el.id : 'name:' + el.name;
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    controls().forEach(el => {
+      const item = saved[keyOf(el)];
+      if (!item) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (typeof item.checked === 'boolean') el.checked = item.checked;
+      } else if (typeof item.value === 'string') {
+        el.value = item.value;
+      }
+    });
+  } catch (err) {
+    console.warn('Could not restore BOTMC PRO settings:', err);
+  }
+  const save = () => {
+    try {
+      const saved = {};
+      controls().forEach(el => {
+        saved[keyOf(el)] = (el.type === 'checkbox' || el.type === 'radio')
+          ? { checked: el.checked }
+          : { value: el.value };
+      });
+      localStorage.setItem(storageKey, JSON.stringify(saved));
+    } catch (err) {
+      console.warn('Could not save BOTMC PRO settings:', err);
+    }
+  };
+  document.addEventListener('input', save, true);
+  document.addEventListener('change', save, true);
+  window.addEventListener('pagehide', save);
+  save();
+})();
 
 </script>
 </body>
